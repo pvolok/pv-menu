@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .menubar {
+            float: left;
+        }
+
+        .menu {
+            background: #abcdef;
+            display: none;
+        }
+
+        .menuitem {
+            display: block;
+        }
+
+        .menuitem.active {
+            background: #9abcde;
+        }
+    </style>
+</head>
+<body>
+
+<div id="menu" class="menubar" data-menu-orient>
+    <a href="#" class="menuitem" data-submenu="#menu1">Menu item 1</a>
+    <a href="#" class="menuitem" data-submenu="#menu2">Menu item 2</a>
+    <a href="#" class="menuitem">Menu item 3</a>
+</div>
+
+<div id="menu1" class="menu">
+    <a href="#" class="menuitem">Menu item 1</a>
+    <a href="#" class="menuitem">Menu item 2</a>
+    <a href="#" class="menuitem">Menu item 3</a>
+</div>
+
+<div id="menu2" class="menu">
+    <a href="#" class="menuitem">Menu item 1</a>
+    <a href="#" class="menuitem">Menu item 2</a>
+    <a href="#" class="menuitem">Menu item 3</a>
+</div>
+
+<script src="../lib/jquery-1.10.2.js"></script>
+<script src="../lib/jquery.ui.position.js"></script>
+<script src="../pv-menu.js"></script>
+<script>
+    $('#menu').menu({});
+</script>
+
+</body>
+</html>
