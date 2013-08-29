@@ -1,16 +1,30 @@
 (function($) {
     var defaultOptions = {
-        item_selector: '.menuitem',
-        delay: 400
+        item_selector: '.menuitem'
     };
 
     var Menu = function($el, options) {
+        var that = this;
         this.$el = $el;
         this.options_ = $.extend({}, defaultOptions, options);
+        this.submenu = null;
+        this.$activeItem = null;
 
-        $el.css({
-            position: 'absolute'
-        }).appendTo(document.body);
+        $el.on('mouseenter mouseleave', function(event) {
+            $(that).trigger(event.type + '_');
+        });
+        $(this).on('mouseenter_', function() {
+            that.$activeItem.addClass('active');
+            if (!that.parentNode) {
+                clearTimeout(that.closeTimer);
+            }
+        }).on('mouseleave_', function() {
+            if (!that.parentNode) {
+                that.closeTimer = setTimeout(function() {
+                    that.closeItem_();
+                }, 300);
+            }
+        });
 
         this.bind_();
     };
@@ -19,62 +33,60 @@
         var that = this,
             options = this.options_;
 
-        var openedItem,
-            activeItem,
-            openTimer;
-
         this.$el.on('mouseenter', options.item_selector, function() {
-            activeItem = this;
-            openTimer = setTimeout(onOpenTimer, openedItem ? 0 : options.delay);
+            that.closeItem_();
+            that.$activeItem = $(this);
+            that.openItem_();
         });
         this.$el.on('mouseleave', options.item_selector, function() {
-            $(this).removeClass('active');
+            that.$activeItem.removeClass('active');
         });
-
-        function onOpenTimer() {
-            if (openedItem) {
-                that.closeItem_(openedItem);
-            }
-
-            openedItem = activeItem;
-            that.openItem_(openedItem);
-        }
     };
 
-    Menu.prototype.openItem_ = function(el) {
-        var $el = $(el),
-            submenu = $el.data('submenu');
+    Menu.prototype.openItem_ = function() {
+        var $item = this.$activeItem,
+            submenu = $item.data('submenu');
+
+        $item.addClass('active');
 
         if (!submenu) {
             return;
         }
 
         if (typeof submenu === 'string') {
-            submenu = $(submenu).menu(this.options_).data('pv-menu');
-            $el.data('submenu', submenu);
+            submenu = $(submenu).menu(this.options_).data('menu');
+            $item.data('submenu', submenu);
         }
 
-        submenu.$el.show().position({
-            of: el,
+        this.submenu = submenu;
+        submenu.parentNode = this;
+
+        submenu.$el.appendTo(document.body).show().position({
+            of: $item,
             my: 'left top',
-            at: 'right top'
+            at: 'right+1 top'
         });
     };
 
-    Menu.prototype.closeItem_ = function(el) {
-        var $el = $(el),
-            submenu = $el.data('submenu');
-
-        if (submenu) {
-            submenu.$el.hide();
+    Menu.prototype.closeItem_ = function() {
+        this.$activeItem && this.$activeItem.removeClass('active');
+        if (this.submenu) {
+            this.submenu.parentNode = null;
+            this.submenu.close();
+            this.submenu = null;
         }
     };
 
+    Menu.prototype.close = function() {
+        this.$el.hide();
+        this.closeItem_();
+    };
+
     $.fn.menu = function(options) {
-        var menu = this.data('pv-menu');
+        var menu = this.data('menu');
         if (!menu) {
             menu = new Menu(this, options);
-            this.data('pv-menu', menu);
+            this.data('menu', menu);
         }
 
         return this;

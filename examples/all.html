@@ -3,27 +3,37 @@
 <head>
     <title></title>
     <style>
+        body {
+            font-family: sans-serif;
+        }
+
         .menubar {
+            background: #222;
             float: left;
         }
 
         .menu {
-            background: #abcdef;
+            background: #222;
             display: none;
+            position: absolute;
         }
 
         .menuitem {
+            color: #aaa;
+            text-decoration: none;
+
             display: block;
+            padding: 5px 10px;
         }
 
         .menuitem.active {
-            background: #9abcde;
+            background: #444;
         }
     </style>
 </head>
 <body>
 
-<div id="menu" class="menubar" data-menu-orient>
+<div id="menu" class="menubar">
     <a href="#" class="menuitem" data-submenu="#menu1">Menu item 1</a>
     <a href="#" class="menuitem" data-submenu="#menu2">Menu item 2</a>
     <a href="#" class="menuitem">Menu item 3</a>
@@ -36,6 +46,12 @@
 </div>
 
 <div id="menu2" class="menu">
+    <a href="#" class="menuitem">Menu item 1</a>
+    <a href="#" class="menuitem" data-submenu="#menu3">Menu item 2</a>
+    <a href="#" class="menuitem">Menu item 3</a>
+</div>
+
+<div id="menu3" class="menu">
     <a href="#" class="menuitem">Menu item 1</a>
     <a href="#" class="menuitem">Menu item 2</a>
     <a href="#" class="menuitem">Menu item 3</a>
