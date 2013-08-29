@@ -1,12 +1,17 @@
 (function($) {
     var defaultOptions = {
-        item_selector: '.menuitem'
+        item_selector: '.menuitem',
+        position: {
+            my: 'left top',
+            at: 'right+1 top'
+        }
     };
 
-    var Menu = function($el, options) {
+    var Menu = function($el, options, rootOptions) {
         var that = this;
         this.$el = $el;
-        this.options_ = $.extend({}, defaultOptions, options);
+        this.inheritOptions = options;
+        this.options_ = $.extend({}, defaultOptions, options, rootOptions);
         this.submenu = null;
         this.$activeItem = null;
 
@@ -54,18 +59,16 @@
         }
 
         if (typeof submenu === 'string') {
-            submenu = $(submenu).menu(this.options_).data('menu');
+            submenu = $(submenu).menu(this.inheritOptions).data('menu');
             $item.data('submenu', submenu);
         }
 
         this.submenu = submenu;
         submenu.parentNode = this;
 
-        submenu.$el.appendTo(document.body).show().position({
-            of: $item,
-            my: 'left top',
-            at: 'right+1 top'
-        });
+        submenu.$el.appendTo(document.body).show().position($.extend({
+            of: $item
+        }, this.options_.position));
     };
 
     Menu.prototype.closeItem_ = function() {
@@ -82,10 +85,10 @@
         this.closeItem_();
     };
 
-    $.fn.menu = function(options) {
+    $.fn.menu = function(options, rootOptions) {
         var menu = this.data('menu');
         if (!menu) {
-            menu = new Menu(this, options);
+            menu = new Menu(this, options, rootOptions);
             this.data('menu', menu);
         }
 

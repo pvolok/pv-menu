@@ -12,6 +12,10 @@
             float: left;
         }
 
+        .menubar .menuitem {
+            display: inline-block;
+        }
+
         .menu {
             background: #222;
             display: none;
@@ -61,7 +65,12 @@
 <script src="../lib/jquery.ui.position.js"></script>
 <script src="../pv-menu.js"></script>
 <script>
-    $('#menu').menu({});
+    $('#menu').menu({}, {
+        position: {
+            my: 'left top',
+            at: 'left bottom+1'
+        }
+    });
 </script>
 
 </body>
