@@ -19,7 +19,6 @@
             $(that).trigger(event.type + '_');
         });
         $(this).on('mouseenter_', function() {
-            that.$activeItem.addClass('active');
             if (!that.parentNode) {
                 clearTimeout(that.closeTimer);
             }
@@ -27,11 +26,16 @@
             if (!that.parentNode) {
                 that.closeTimer = setTimeout(function() {
                     that.closeItem_();
+                    $(that).trigger('menuclose');
                 }, 300);
             }
         });
 
-        this.bind_();
+        if (this.options_.trigger == 'delay') {
+            this.bindDelayed_();
+        } else {
+            this.bind_();
+        }
     };
 
     Menu.prototype.bind_ = function() {
@@ -44,7 +48,36 @@
             that.openItem_();
         });
         this.$el.on('mouseleave', options.item_selector, function() {
-            that.$activeItem.removeClass('active');
+            that.$activeItem.data('submenu') || that.$activeItem.removeClass('active');
+        });
+    };
+
+    Menu.prototype.bindDelayed_ = function() {
+        var that = this,
+            options = this.options_,
+            active = false,
+            timer;
+
+        this.$el.on('mouseenter', options.item_selector, function() {
+            var $item = $(this);
+            that.closeItem_();
+            that.$activeItem = $item;
+            $item.data('submenu') || $item.addClass('active');
+            if (active) {
+                that.openItem_();
+            } else {
+                timer = setTimeout(function() {
+                    active = true;
+                    that.openItem_();
+                }, 300);
+            }
+        });
+        this.$el.on('mouseleave', options.item_selector, function() {
+            that.$activeItem.data('submenu') || that.$activeItem.removeClass('active');
+            clearTimeout(timer);
+        });
+        $(this).on('menuclose', function() {
+            active = false;
         });
     };
 
