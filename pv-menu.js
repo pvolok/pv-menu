@@ -3,7 +3,7 @@
         item_selector: '.menuitem',
         position: {
             my: 'left top',
-            at: 'right+1 top'
+            at: 'right top'
         }
     };
 
@@ -18,21 +18,26 @@
         $el.on('mouseenter mouseleave', function(event) {
             $(that).trigger(event.type + '_');
         });
-        $(this).on('mouseenter_', function() {
-            if (!that.parentNode) {
-                clearTimeout(that.closeTimer);
-            }
-        }).on('mouseleave_', function() {
-            if (!that.parentNode) {
-                that.closeTimer = setTimeout(function() {
-                    that.closeItem_();
-                    $(that).trigger('menuclose');
-                }, 300);
-            }
-        });
+
+        if (this.options_.trigger != 'click') {
+            $(this).on('mouseenter_', function() {
+                if (!that.parentNode) {
+                    clearTimeout(that.closeTimer);
+                }
+            }).on('mouseleave_', function() {
+                if (!that.parentNode) {
+                    that.closeTimer = setTimeout(function() {
+                        that.closeItem_();
+                        $(that).trigger('menuclose');
+                    }, 300);
+                }
+            });
+        }
 
         if (this.options_.trigger == 'delay') {
             this.bindDelayed_();
+        } else if (this.options_.trigger == 'click') {
+            this.bindClicked_();
         } else {
             this.bind_();
         }
@@ -79,6 +84,45 @@
         $(this).on('menuclose', function() {
             active = false;
         });
+    };
+
+    Menu.prototype.bindClicked_ = function() {
+        var that = this,
+            options = this.options_,
+            active = false;
+
+        this.$el.on('mouseenter', options.item_selector, function() {
+            var $item = $(this);
+            that.closeItem_();
+            that.$activeItem = $item;
+            $item.data('submenu') || $item.addClass('active');
+            if (active) {
+                that.openItem_();
+            }
+        });
+        this.$el.on('mouseleave', options.item_selector, function() {
+            that.$activeItem.data('submenu') || that.$activeItem.removeClass('active');
+        });
+        var clickHandler = function(event) {
+            event.preventDefault();
+
+            var $doc = $(document);
+            that.openItem_();
+            active = true;
+
+            $doc.on('click', function(event) {
+                var el = that.$el[0],
+                    target = event.target;
+                if (target === el || $.contains(el, target)) {
+                    return;
+                }
+
+                that.closeItem_();
+                active = false;
+                $doc.off('click', clickHandler);
+            });
+        };
+        this.$el.on('click', options.item_selector, clickHandler);
     };
 
     Menu.prototype.openItem_ = function() {

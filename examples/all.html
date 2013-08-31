@@ -18,6 +18,7 @@
 
         .menu {
             background: #222;
+            box-shadow: 1px 1px 3px 1px #666;
             display: none;
             position: absolute;
         }
@@ -37,24 +38,41 @@
 </head>
 <body>
 
-<div id="menu" class="menubar">
+<h3>Default</h3>
+<div id="menu_a" class="menubar">
     <a href="#" class="menuitem" data-submenu="#menu1">Menu item 1</a>
     <a href="#" class="menuitem" data-submenu="#menu2">Menu item 2</a>
     <a href="#" class="menuitem">Menu item 3</a>
 </div>
+<div style="clear: both;"></div>
+
+<h3>Delayed open</h3>
+<div id="menu_b" class="menubar">
+    <a href="#" class="menuitem" data-submenu="#menu1">Menu item 1</a>
+    <a href="#" class="menuitem" data-submenu="#menu2">Menu item 2</a>
+    <a href="#" class="menuitem">Menu item 3</a>
+</div>
+<div style="clear: both;"></div>
+
+<h3>Open by click</h3>
+<div id="menu_c" class="menubar">
+    <a href="#" class="menuitem" data-submenu="#menu1">Menu item 1</a>
+    <a href="#" class="menuitem" data-submenu="#menu2">Menu item 2</a>
+    <a href="#" class="menuitem">Menu item 3</a>
+</div>
+<div style="clear: both;"></div>
+
 
 <div id="menu1" class="menu">
     <a href="#" class="menuitem">Menu item 1</a>
     <a href="#" class="menuitem">Menu item 2</a>
     <a href="#" class="menuitem">Menu item 3</a>
 </div>
-
 <div id="menu2" class="menu">
     <a href="#" class="menuitem">Menu item 1</a>
     <a href="#" class="menuitem" data-submenu="#menu3">Menu item 2</a>
-    <a href="#" class="menuitem">Menu item 3</a>
+    <a href="#" class="menuitem" data-submenu="#menu3">Menu item 3</a>
 </div>
-
 <div id="menu3" class="menu">
     <a href="#" class="menuitem">Menu item 1</a>
     <a href="#" class="menuitem">Menu item 2</a>
@@ -65,11 +83,24 @@
 <script src="../lib/jquery.ui.position.js"></script>
 <script src="../pv-menu.js"></script>
 <script>
-    $('#menu').menu({}, {
+    $('#menu_a').menu({}, {
+        position: {
+            my: 'left top',
+            at: 'left bottom'
+        }
+    });
+    $('#menu_b').menu({}, {
         trigger: 'delay',
         position: {
             my: 'left top',
-            at: 'left bottom+1'
+            at: 'left bottom'
+        }
+    });
+    $('#menu_c').menu({}, {
+        trigger: 'click',
+        position: {
+            my: 'left top',
+            at: 'left bottom'
         }
     });
 </script>
