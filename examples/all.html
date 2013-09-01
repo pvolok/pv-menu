@@ -103,6 +103,13 @@
             at: 'left bottom'
         }
     });
+
+    $($('#menu_c').data('menu')).on('action', function(event) {
+        console && console.log(event);
+        if (!$(event.originalEvent.currentTarget).data('submenu')) {
+            event.closeMenu();
+        }
+    });
 </script>
 
 </body>

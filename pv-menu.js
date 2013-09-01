@@ -41,6 +41,14 @@
         } else if (this.options_.trigger == 'click') {
             this.bindClicked_();
         }
+
+        $el.on('click', this.options_.item_selector, function(event) {
+            $(that).trigger({
+                type: 'action',
+                originalEvent: event,
+                closeMenu: $.proxy(that.closeRoot, that)
+            });
+        });
     };
 
     Menu.prototype.bind_ = function() {
@@ -150,6 +158,12 @@
     Menu.prototype.close = function() {
         this.$el.hide();
         this.closeItem_();
+    };
+
+    Menu.prototype.closeRoot = function() {
+        var menu = this;
+        while (menu.parentNode) menu = menu.parentNode;
+        menu.closeItem_();
     };
 
     $.fn.menu = function(options, rootOptions) {
