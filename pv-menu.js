@@ -111,10 +111,15 @@
             active = true;
 
             $doc.on('click', function(event) {
-                var el = that.$el[0],
-                    target = event.target;
-                if (target === el || $.contains(el, target)) {
-                    return;
+                var menu = that,
+                    target = event.target,
+                    el;
+                while (menu) {
+                    el = menu.$el[0];
+                    if (target === el || $.contains(el, target)) {
+                        return;
+                    }
+                    menu = menu.submenu;
                 }
 
                 that.closeItem_();
