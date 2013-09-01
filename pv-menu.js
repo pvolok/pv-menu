@@ -14,6 +14,7 @@
         this.options_ = $.extend({}, defaultOptions, options, rootOptions);
         this.submenu = null;
         this.$activeItem = null;
+        this.active = true;
 
         $el.on('mouseenter mouseleave', function(event) {
             $(that).trigger(event.type + '_');
@@ -34,12 +35,11 @@
             });
         }
 
+        this.bind_();
         if (this.options_.trigger == 'delay') {
             this.bindDelayed_();
         } else if (this.options_.trigger == 'click') {
             this.bindClicked_();
-        } else {
-            this.bind_();
         }
     };
 
@@ -48,9 +48,11 @@
             options = this.options_;
 
         this.$el.on('mouseenter', options.item_selector, function() {
+            var $item = $(this);
             that.closeItem_();
-            that.$activeItem = $(this);
-            that.openItem_();
+            that.$activeItem = $item;
+            that.active && that.openItem_();
+            $item.data('submenu') || $item.addClass('active');
         });
         this.$el.on('mouseleave', options.item_selector, function() {
             that.$activeItem.data('submenu') || that.$activeItem.removeClass('active');
@@ -60,55 +62,38 @@
     Menu.prototype.bindDelayed_ = function() {
         var that = this,
             options = this.options_,
-            active = false,
             timer;
 
+        that.active = false;
+
         this.$el.on('mouseenter', options.item_selector, function() {
-            var $item = $(this);
-            that.closeItem_();
-            that.$activeItem = $item;
-            $item.data('submenu') || $item.addClass('active');
-            if (active) {
-                that.openItem_();
-            } else {
+            if (!that.active) {
                 timer = setTimeout(function() {
-                    active = true;
+                    that.active = true;
                     that.openItem_();
                 }, 300);
             }
         });
         this.$el.on('mouseleave', options.item_selector, function() {
-            that.$activeItem.data('submenu') || that.$activeItem.removeClass('active');
             clearTimeout(timer);
         });
         $(this).on('menuclose', function() {
-            active = false;
+            that.active = false;
         });
     };
 
     Menu.prototype.bindClicked_ = function() {
         var that = this,
-            options = this.options_,
-            active = false;
+            options = this.options_;
 
-        this.$el.on('mouseenter', options.item_selector, function() {
-            var $item = $(this);
-            that.closeItem_();
-            that.$activeItem = $item;
-            $item.data('submenu') || $item.addClass('active');
-            if (active) {
-                that.openItem_();
-            }
-        });
-        this.$el.on('mouseleave', options.item_selector, function() {
-            that.$activeItem.data('submenu') || that.$activeItem.removeClass('active');
-        });
+        that.active = false;
+
         var clickHandler = function(event) {
             event.preventDefault();
 
             var $doc = $(document);
             that.openItem_();
-            active = true;
+            that.active = true;
 
             $doc.on('click', function(event) {
                 var menu = that,
@@ -123,7 +108,7 @@
                 }
 
                 that.closeItem_();
-                active = false;
+                that.active = false;
                 $doc.off('click', clickHandler);
             });
         };
