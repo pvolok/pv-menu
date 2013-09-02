@@ -96,7 +96,7 @@
 
         that.active = false;
 
-        var clickHandler = function(event) {
+        this.docClickHandler = function(event) {
             event.preventDefault();
 
             var $doc = $(document);
@@ -104,23 +104,13 @@
             that.active = true;
 
             $doc.on('click', function(event) {
-                var menu = that,
-                    target = event.target,
-                    el;
-                while (menu) {
-                    el = menu.$el[0];
-                    if (target === el || $.contains(el, target)) {
-                        return;
-                    }
-                    menu = menu.submenu;
+                if (!that.isOrContains_(event.target)) {
+                    that.active = false;
+                    that.closeRoot();
                 }
-
-                that.closeItem_();
-                that.active = false;
-                $doc.off('click', clickHandler);
             });
         };
-        this.$el.on('click', options.item_selector, clickHandler);
+        this.$el.on('click', options.item_selector, this.docClickHandler);
     };
 
     Menu.prototype.openItem_ = function() {
@@ -161,9 +151,18 @@
     };
 
     Menu.prototype.closeRoot = function() {
-        var menu = this;
-        while (menu.parentNode) menu = menu.parentNode;
-        menu.closeItem_();
+        if (this.parentNode) {
+            this.parentNode.closeRoot();
+        } else {
+            this.closeItem_();
+            this.docClickHandler && $(document).off('click', this.docClickHandler);
+        }
+
+    };
+
+    Menu.prototype.isOrContains_ = function(el) {
+        return this.$el[0] == el || $.contains(this.$el[0], el)
+            || this.submenu && this.submenu.isOrContains_(el);
     };
 
     $.fn.menu = function(options, rootOptions) {
@@ -175,4 +174,53 @@
 
         return this;
     };
+
+    $.fn.contextMenu = function(menu) {
+        var docClickHandler;
+        var root = {
+            closeRoot: function() {
+                docClickHandler && $(document).off('click', close);
+                menu.close();
+                menu.parentNode = null;
+            }
+        };
+
+        this.data('menu', root);
+
+        menu = $(menu).menu({}).data('menu');
+        this.on('contextmenu', function(event) {
+            event.preventDefault();
+
+            var $wnd = $(window),
+                $menu = menu.$el,
+                left = event.pageX,
+                top = event.pageY;
+
+            $menu.appendTo(document.body).show();
+            menu.parentNode = root;
+
+            var width = $menu.outerWidth(),
+                height = $menu.outerHeight();
+
+            if (event.clientX + width > $wnd.width()) {
+                left -= width;
+                left = Math.max(left, $wnd.scrollLeft());
+            }
+            if (event.clientY + height > $wnd.height()) {
+                top -= height;
+                top = Math.max(top, $wnd.scrollTop());
+            }
+
+            $menu.css({
+                left: left,
+                top: top
+            });
+
+            $(document).on('click', docClickHandler = function(event) {
+                menu.isOrContains_(event.target) || root.closeRoot();
+            });
+        });
+
+        return this;
+    }
 })(jQuery);
