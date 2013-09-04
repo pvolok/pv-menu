@@ -1,12 +1,16 @@
 (function($) {
+    /** @dict */
     var defaultOptions = {
-        item_selector: '.menuitem',
-        position: {
-            my: 'left top',
-            at: 'right top'
+        'item_selector': '.menuitem',
+        'position': {
+            'my': 'left top',
+            'at': 'right top'
         }
     };
 
+    /**
+     * @constructor
+     */
     var Menu = function($el, options, rootOptions) {
         var that = this;
         this.$el = $el;
@@ -20,7 +24,7 @@
             $(that).trigger(event.type + '_');
         });
 
-        if (this.options_.trigger != 'click') {
+        if (this.options_['trigger'] != 'click') {
             $(this).on('mouseenter_', function() {
                 if (!that.parentNode) {
                     clearTimeout(that.closeTimer);
@@ -36,18 +40,18 @@
         }
 
         this.bind_();
-        if (this.options_.trigger == 'delay') {
+        if (this.options_['trigger'] == 'delay') {
             this.bindDelayed_();
-        } else if (this.options_.trigger == 'click') {
+        } else if (this.options_['trigger'] == 'click') {
             this.bindClicked_();
         }
 
-        $el.on('click', this.options_.item_selector, function(event) {
-            $(that).trigger({
-                type: 'action',
-                originalEvent: event,
-                closeMenu: $.proxy(that.closeRoot, that)
-            });
+        $el.on('click', this.options_['item_selector'], function(event) {
+            $(that).trigger(/** @type {jQuery.event} */ ({
+                'type': 'action',
+                'originalEvent': event,
+                'closeMenu': $.proxy(that.closeRoot, that)
+            }));
         });
     };
 
@@ -55,14 +59,14 @@
         var that = this,
             options = this.options_;
 
-        this.$el.on('mouseenter', options.item_selector, function() {
+        this.$el.on('mouseenter', options['item_selector'], function() {
             var $item = $(this);
             that.closeItem_();
             that.$activeItem = $item;
             that.active && that.openItem_();
             $item.data('submenu') || $item.addClass('active');
         });
-        this.$el.on('mouseleave', options.item_selector, function() {
+        this.$el.on('mouseleave', options['item_selector'], function() {
             that.$activeItem.data('submenu') || that.$activeItem.removeClass('active');
         });
     };
@@ -74,7 +78,7 @@
 
         that.active = false;
 
-        this.$el.on('mouseenter', options.item_selector, function() {
+        this.$el.on('mouseenter', options['item_selector'], function() {
             if (!that.active) {
                 timer = setTimeout(function() {
                     that.active = true;
@@ -82,7 +86,7 @@
                 }, 300);
             }
         });
-        this.$el.on('mouseleave', options.item_selector, function() {
+        this.$el.on('mouseleave', options['item_selector'], function() {
             clearTimeout(timer);
         });
         $(this).on('menuclose', function() {
@@ -110,7 +114,7 @@
                 }
             });
         };
-        this.$el.on('click', options.item_selector, this.docClickHandler);
+        this.$el.on('click', options['item_selector'], this.docClickHandler);
     };
 
     Menu.prototype.openItem_ = function() {
@@ -124,7 +128,7 @@
         }
 
         if (typeof submenu === 'string') {
-            submenu = $(submenu).menu(this.inheritOptions).data('menu');
+            submenu = $(submenu)['menu'](this.inheritOptions).data('menu');
             $item.data('submenu', submenu);
         }
 
@@ -132,8 +136,8 @@
         submenu.parentNode = this;
 
         submenu.$el.appendTo(document.body).show().position($.extend({
-            of: $item
-        }, this.options_.position));
+            'of': $item
+        }, this.options_['position']));
     };
 
     Menu.prototype.closeItem_ = function() {
@@ -165,7 +169,7 @@
             || this.submenu && this.submenu.isOrContains_(el);
     };
 
-    $.fn.menu = function(options, rootOptions) {
+    $.fn['menu'] = function(options, rootOptions) {
         var menu = this.data('menu');
         if (!menu) {
             menu = new Menu(this, options, rootOptions);
@@ -175,11 +179,14 @@
         return this;
     };
 
-    $.fn.contextMenu = function(menu) {
-        var docClickHandler;
+    $.fn['contextMenu'] = function(menu) {
+        /** @param {jQuery.event=} event */
+        var docClickHandler = function(event) {
+            menu.isOrContains_(event.target) || root.closeRoot();
+        };
         var root = {
             closeRoot: function() {
-                docClickHandler && $(document).off('click', close);
+                docClickHandler && $(document).off('click', docClickHandler);
                 menu.close();
                 menu.parentNode = null;
             }
@@ -187,7 +194,7 @@
 
         this.data('menu', root);
 
-        menu = $(menu).menu({}).data('menu');
+        menu = $(menu)['menu']({}).data('menu');
         this.on('contextmenu', function(event) {
             event.preventDefault();
 
@@ -216,9 +223,7 @@
                 top: top
             });
 
-            $(document).on('click', docClickHandler = function(event) {
-                menu.isOrContains_(event.target) || root.closeRoot();
-            });
+            $(document).on('click', docClickHandler);
         });
 
         return this;
