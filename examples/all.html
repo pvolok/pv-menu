@@ -40,7 +40,7 @@
 <body>
 
 <h3>Default</h3>
-<div id="menu_a" class="menubar">
+<div id="menu_a" class="menubar" tabindex="0">
     <a href="javascript:" class="menuitem" data-submenu="#menu1">Menu item 1</a>
     <a href="javascript:" class="menuitem" data-submenu="#menu2">Menu item 2</a>
     <a href="javascript:" class="menuitem">Menu item 3</a>
@@ -48,7 +48,7 @@
 <div style="clear: both;"></div>
 
 <h3>Delayed open</h3>
-<div id="menu_b" class="menubar">
+<div id="menu_b" class="menubar" tabindex="0">
     <a href="javascript:" class="menuitem" data-submenu="#menu1">Menu item 1</a>
     <a href="javascript:" class="menuitem" data-submenu="#menu2">Menu item 2</a>
     <a href="javascript:" class="menuitem">Menu item 3</a>
@@ -56,7 +56,7 @@
 <div style="clear: both;"></div>
 
 <h3>Open by click</h3>
-<div id="menu_c" class="menubar">
+<div id="menu_c" class="menubar" tabindex="0">
     <a href="javascript:" class="menuitem" data-submenu="#menu1">Menu item 1</a>
     <a href="javascript:" class="menuitem" data-submenu="#menu2">Menu item 2</a>
     <a href="javascript:" class="menuitem">Menu item 3</a>
@@ -64,33 +64,33 @@
 <div style="clear: both;"></div>
 
 
-<div id="menu1" class="menu">
+<div id="menu1" class="menu" tabindex="0">
     <a href="javascript:" class="menuitem">Menu item 1</a>
     <a href="javascript:" class="menuitem">Menu item 2</a>
     <a href="javascript:" class="menuitem">Menu item 3</a>
 </div>
-<div id="menu2" class="menu">
+<div id="menu2" class="menu" tabindex="0">
     <a href="javascript:" class="menuitem">Menu item 1</a>
     <a href="javascript:" class="menuitem" data-submenu="#menu3">Menu item 2</a>
     <a href="javascript:" class="menuitem" data-submenu="#menu3">Menu item 3</a>
 </div>
-<div id="menu3" class="menu">
+<div id="menu3" class="menu" tabindex="0">
     <a href="javascript:" class="menuitem">Menu item 1</a>
     <a href="javascript:" class="menuitem">Menu item 2</a>
     <a href="javascript:" class="menuitem">Menu item 3</a>
 </div>
 
 <h3>Context menu</h3>
-<div id="cmenu" style="background: #bbb; width: 400px; height: 400px;"></div>
+<div id="cmenu" style="background: #bbb; width: 400px; height: 400px;" tabindex="0"></div>
 
-<div id="cmenu1" class="menu">
+<div id="cmenu1" class="menu" tabindex="0">
     <a href="javascript:" class="menuitem">Menu item 1</a>
     <a href="javascript:" class="menuitem" data-submenu="#cmenu2">Menu item 2</a>
     <a href="javascript:" class="menuitem">Menu item 3</a>
     <a href="javascript:" class="menuitem">Menu item 4</a>
 </div>
 
-<div id="cmenu2" class="menu">
+<div id="cmenu2" class="menu" tabindex="0">
     <a href="javascript:" class="menuitem">Menu item 1</a>
     <a href="javascript:" class="menuitem">Menu item 2</a>
     <a href="javascript:" class="menuitem">Menu item 3</a>
@@ -102,6 +102,7 @@
 <script src="../pv-menu.js"></script>
 <script>
     $('#menu_a').menu({}, {
+        orientation: 'h',
         position: {
             my: 'left top',
             at: 'left bottom'
@@ -109,6 +110,7 @@
     });
     $('#menu_b').menu({}, {
         trigger: 'delay',
+        orientation: 'h',
         position: {
             my: 'left top',
             at: 'left bottom'
@@ -116,6 +118,7 @@
     });
     $('#menu_c').menu({}, {
         trigger: 'click',
+        orientation: 'h',
         position: {
             my: 'left top',
             at: 'left bottom'

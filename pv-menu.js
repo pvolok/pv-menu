@@ -1,7 +1,14 @@
 (function($) {
+    var KEY_LEFT = 37,
+        KEY_UP = 38,
+        KEY_RIGHT = 39,
+        KEY_DOWN = 40;
+
+
     /** @dict */
     var defaultOptions = {
         'item_selector': '.menuitem',
+        'orientation': 'v',
         'position': {
             'my': 'left top',
             'at': 'right top'
@@ -32,8 +39,7 @@
             }).on('mouseleave_', function() {
                 if (!that.parentNode) {
                     that.closeTimer = setTimeout(function() {
-                        that.closeItem_();
-                        $(that).trigger('menuclose');
+                        that.closeRoot();
                     }, 300);
                 }
             });
@@ -45,6 +51,8 @@
         } else if (this.options_['trigger'] == 'click') {
             this.bindClicked_();
         }
+
+        // this.bindKeyboard_();
 
         $el.on('click', this.options_['item_selector'], function(event) {
             $(that).trigger(/** @type {jQuery.event} */ ({
@@ -67,7 +75,9 @@
             $item.data('submenu') || $item.addClass('active');
         });
         this.$el.on('mouseleave', options['item_selector'], function() {
-            that.$activeItem.data('submenu') || that.$activeItem.removeClass('active');
+            if (that.$activeItem && !that.$activeItem.data('submenu')) {
+                that.$activeItem.removeClass('active');
+            }
         });
     };
 
@@ -101,25 +111,73 @@
         that.active = false;
 
         this.docClickHandler = function(event) {
+            if (!that.isOrContains_(event.target)) {
+                that.active = false;
+                that.closeRoot();
+            }
+        };
+        this.$el.on('click', options['item_selector'], function(event) {
             event.preventDefault();
 
-            var $doc = $(document);
             that.openItem_();
             that.active = true;
 
-            $doc.on('click', function(event) {
-                if (!that.isOrContains_(event.target)) {
-                    that.active = false;
-                    that.closeRoot();
+            $(document).on('click', that.docClickHandler);
+        });
+        $(this).on('menuclose', function() {
+            that.active = false;
+        });
+    };
+
+    Menu.prototype.bindKeyboard_ = function() {
+        var that = this,
+            $el = this.$el,
+            itemSelector = this.options_['item_selector'],
+            orientation = this.options_['orientation'];
+
+        $el.find(itemSelector).attr('tabindex', -1);
+        $el.on('keydown', function(event) {
+            var key = event['which'];
+            if (key == 27) { // escape
+                that.closeRoot();
+            } else if (key == 13) { // enter
+                that.$activeItem && that.$activeItem.click();
+            } else if (key == (orientation == 'h' ? KEY_RIGHT : KEY_DOWN)) { // next
+                that.moveSelection_(1);
+            } else if (key == (orientation == 'h' ? KEY_LEFT : KEY_UP)) { // prev
+                that.moveSelection_(-1);
+            } else if (key == (orientation == 'h' ? KEY_DOWN : KEY_RIGHT)) { // open
+                that.openItem_();
+                var submenu = that.submenu;
+                if (submenu) {
+                    submenu.$activeItem = submenu.$el.find(itemSelector).first().addClass('active');
                 }
-            });
-        };
-        this.$el.on('click', options['item_selector'], this.docClickHandler);
+            } else if (key == (orientation == 'h' ? KEY_UP : KEY_LEFT)) { // close
+                var parentMenu = that.parentNode;
+                if (parentMenu) {
+                    parentMenu.$el.focus();
+                    parentMenu.closeItem_();
+                    parentMenu.$activeItem.addClass('active');
+                }
+            } else {
+                return;
+            }
+
+            event.preventDefault();
+        });
+        $el.blur(function() {
+            if (!that.submenu) {
+                that.closeItem_();
+            }
+        });
     };
 
     Menu.prototype.openItem_ = function() {
-        var $item = this.$activeItem,
-            submenu = $item.data('submenu');
+        var $item = this.$activeItem;
+
+        if (!$item) return;
+
+        var submenu = $item.data('submenu');
 
         $item.addClass('active');
 
@@ -152,6 +210,7 @@
     Menu.prototype.close = function() {
         this.$el.hide();
         this.closeItem_();
+        this.$activeItem = null;
     };
 
     Menu.prototype.closeRoot = function() {
@@ -160,8 +219,35 @@
         } else {
             this.closeItem_();
             this.docClickHandler && $(document).off('click', this.docClickHandler);
+
+            this.$activeItem = null;
+
+            $(this).trigger('menuclose');
         }
 
+    };
+
+    Menu.prototype.moveSelection_ = function(step) {
+        var items = this.$el.find(this.options_['item_selector']),
+            activeItem,
+            nextIndex,
+            i, n;
+
+        if (this.$activeItem) {
+            activeItem = this.$activeItem.removeClass('active')[0];
+        }
+
+        for (i = 0, n = items.length; i < n; ++i) {
+            if (activeItem == items[i]) {
+                nextIndex = i + step;
+                break;
+            }
+        }
+        if (nextIndex === undefined) nextIndex = step == 1 ? 0 : n - 1;
+        else if (nextIndex >= n) nextIndex = 0;
+        else if (nextIndex < 0) nextIndex = n - 1;
+
+        this.$activeItem = $(items[nextIndex]).addClass('active');
     };
 
     Menu.prototype.isOrContains_ = function(el) {
@@ -219,8 +305,8 @@
             }
 
             $menu.css({
-                left: left,
-                top: top
+                'left': left,
+                'top': top
             });
 
             $(document).on('click', docClickHandler);
