@@ -52,7 +52,7 @@
             this.bindClicked_();
         }
 
-        // this.bindKeyboard_();
+        this.bindKeyboard_();
 
         $el.on('click', this.options_['item_selector'], function(event) {
             $(that).trigger(/** @type {jQuery.event} */ ({
@@ -119,10 +119,11 @@
             event.preventDefault();
 
             that.active = true;
+            that.$activeItem = $(this);
             that.selectItem_();
             that.openItem_();
 
-            $(document).on('click', that.docClickHandler);
+            that.setDocClickHandler_();
         });
         $(this).on('menuclose', function() {
             that.active = false;
@@ -147,17 +148,16 @@
             } else if (key == (orientation == 'h' ? KEY_LEFT : KEY_UP)) { // prev
                 that.moveSelection_(-1);
             } else if (key == (orientation == 'h' ? KEY_DOWN : KEY_RIGHT)) { // open
-                that.openItem_();
+                that.openItem_(true);
                 var submenu = that.submenu;
                 if (submenu) {
-                    submenu.$activeItem = submenu.$el.find(itemSelector).first().addClass('active');
+                    submenu.$activeItem = submenu.$el.find(itemSelector).first();
+                    submenu.selectItem_(true);
                 }
             } else if (key == (orientation == 'h' ? KEY_UP : KEY_LEFT)) { // close
                 var parentMenu = that.parentNode;
                 if (parentMenu) {
-                    parentMenu.$el.focus();
                     parentMenu.closeItem_();
-                    parentMenu.$activeItem.addClass('active');
                 }
             } else {
                 return;
@@ -165,9 +165,14 @@
 
             event.preventDefault();
         });
+        $el.focus(function() {
+            that.setDocClickHandler_();
+        });
         $el.blur(function() {
-            if (!that.submenu) {
-                that.closeItem_();
+            if (!that.parentNode && !that.submenu) {
+                that.deselectItem_();
+                that.$activeItem = null;
+                that.unsetDocClickHandler_();
             }
         });
     };
@@ -192,8 +197,8 @@
         }
     };
 
-    Menu.prototype.openItem_ = function() {
-        if (!this.$activeItem || !this.active) return;
+    Menu.prototype.openItem_ = function(opt_keyboard) {
+        if (!this.$activeItem || !this.active && !opt_keyboard) return;
 
         var $item = this.$activeItem,
             submenu = $item.data('submenu');
@@ -210,11 +215,12 @@
 
         submenu.$el.appendTo(document.body).show().position($.extend({
             'of': $item
-        }, this.options_['position']));
+        }, this.options_['position'])).focus();
     };
 
     Menu.prototype.closeItem_ = function() {
         if (this.submenu) {
+            this.$el.focus();
             this.submenu.parentNode = null;
             this.submenu.close();
             this.submenu = null;
@@ -234,7 +240,6 @@
         } else {
             this.closeItem_();
             this.deselectItem_();
-            this.docClickHandler && $(document).off('click', this.docClickHandler);
 
             this.$activeItem = null;
 
@@ -250,7 +255,7 @@
             i, n;
 
         if (this.$activeItem) {
-            activeItem = this.$activeItem.removeClass('active')[0];
+            activeItem = this.$activeItem[0];
         }
 
         for (i = 0, n = items.length; i < n; ++i) {
@@ -263,12 +268,28 @@
         else if (nextIndex >= n) nextIndex = 0;
         else if (nextIndex < 0) nextIndex = n - 1;
 
-        this.$activeItem = $(items[nextIndex]).addClass('active');
+        this.deselectItem_();
+        this.$activeItem = $(items[nextIndex]);
+        this.selectItem_(true);
     };
 
     Menu.prototype.isOrContains_ = function(el) {
         return this.$el[0] == el || $.contains(this.$el[0], el)
             || this.submenu && this.submenu.isOrContains_(el);
+    };
+
+    Menu.prototype.setDocClickHandler_ = function() {
+        if (this.docClickHandler && !this.docClickHandlerAdded) {console.log('add');
+            $(document).on('click', this.docClickHandler);
+            this.docClickHandlerAdded = true;
+        }
+    };
+
+    Menu.prototype.unsetDocClickHandler_ = function() {
+        if (this.docClickHandler && this.docClickHandlerAdded) {console.log('remove');
+            $(document).off('click', this.docClickHandler);
+            this.docClickHandlerAdded = false;
+        }
     };
 
     $.fn['menu'] = function(options, rootOptions) {
