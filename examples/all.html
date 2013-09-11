@@ -35,6 +35,15 @@
         .menuitem.active {
             background: #444;
         }
+
+        .menuitem[data-submenu]:before {
+            content: '▸';
+            float: right;
+            padding-left: 6px;
+        }
+        .menubar .menuitem[data-submenu]:before {
+            content: '▾';
+        }
     </style>
 </head>
 <body>
