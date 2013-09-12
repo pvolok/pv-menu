@@ -178,6 +178,10 @@
         });
     };
 
+    /**
+     * @param {boolean=} opt_keyboard
+     * @private
+     */
     Menu.prototype.selectItem_ = function(opt_keyboard) {
         if (!this.$activeItem) return;
 
@@ -198,6 +202,10 @@
         }
     };
 
+    /**
+     * @param {boolean=} opt_keyboard
+     * @private
+     */
     Menu.prototype.openItem_ = function(opt_keyboard) {
         if (!this.$activeItem || !this.active && !opt_keyboard) return;
 
@@ -280,14 +288,14 @@
     };
 
     Menu.prototype.setDocClickHandler_ = function() {
-        if (this.docClickHandler && !this.docClickHandlerAdded) {console.log('add');
+        if (this.docClickHandler && !this.docClickHandlerAdded) {
             $(document).on('click', this.docClickHandler);
             this.docClickHandlerAdded = true;
         }
     };
 
     Menu.prototype.unsetDocClickHandler_ = function() {
-        if (this.docClickHandler && this.docClickHandlerAdded) {console.log('remove');
+        if (this.docClickHandler && this.docClickHandlerAdded) {
             $(document).off('click', this.docClickHandler);
             this.docClickHandlerAdded = false;
         }
