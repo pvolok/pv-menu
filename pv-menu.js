@@ -8,6 +8,7 @@
     /** @dict */
     var defaultOptions = {
         'item_selector': '.menuitem',
+        'delay': 300,
         'orientation': 'v',
         'position': {
             'my': 'left top',
@@ -40,7 +41,7 @@
                 if (!that.parentNode) {
                     that.closeTimer = setTimeout(function() {
                         that.closeRoot();
-                    }, 300);
+                    }, that.options_['delay']);
                 }
             });
         }
@@ -92,7 +93,7 @@
                     that.active = true;
                     that.selectItem_();
                     that.openItem_();
-                }, 300);
+                }, options['delay']);
             }
         });
         this.$el.on('mouseleave', options['item_selector'], function() {
