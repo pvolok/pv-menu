@@ -1,0 +1,17 @@
+.menubar {
+    float: left;
+}
+
+.menubar .menuitem {
+    display: inline-block;
+}
+
+.menu {
+    display: none;
+    position: absolute;
+}
+
+.menuitem {
+    display: block;
+    white-space: nowrap;
+}
