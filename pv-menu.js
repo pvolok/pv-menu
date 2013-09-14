@@ -23,7 +23,7 @@
         var that = this;
         this.$el = $el;
         this.inheritOptions = options;
-        this.options_ = $.extend({}, defaultOptions, options, rootOptions);
+        this.options_ = options = $.extend({}, defaultOptions, options, rootOptions);
         this.submenu = null;
         this.$activeItem = null;
         this.active = true;
@@ -32,7 +32,7 @@
             $(that).trigger(event.type + '_');
         });
 
-        if (this.options_['trigger'] != 'click') {
+        if (options['trigger'] != 'click') {
             $(this).on('mouseenter_', function() {
                 if (!that.parentNode) {
                     clearTimeout(that.closeTimer);
@@ -41,21 +41,21 @@
                 if (!that.parentNode) {
                     that.closeTimer = setTimeout(function() {
                         that.closeRoot();
-                    }, that.options_['delay']);
+                    }, options['delay']);
                 }
             });
         }
 
         this.bind_();
-        if (this.options_['trigger'] == 'delay') {
+        if (options['trigger'] == 'delay') {
             this.bindDelayed_();
-        } else if (this.options_['trigger'] == 'click') {
+        } else if (options['trigger'] == 'click') {
             this.bindClicked_();
         }
 
         this.bindKeyboard_();
 
-        $el.on('click', this.options_['item_selector'], function(event) {
+        $el.on('click', options['item_selector'], function(event) {
             $(that).trigger(/** @type {jQuery.event} */ ({
                 'type': 'action',
                 'originalEvent': event,
